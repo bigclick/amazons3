@@ -70,6 +70,11 @@ class AmazonS3StreamWrapper implements DrupalStreamWrapperInterface {
   protected $caching = FALSE;
 
   /**
+   * @var boolean Whether to allow public access to uploaded files
+   */
+  protected $public_access = FALSE;
+
+  /**
    * @var array Map for files that should be delivered with a torrent URL.
    */
   protected $torrents = array();
@@ -111,6 +116,11 @@ class AmazonS3StreamWrapper implements DrupalStreamWrapperInterface {
     // Check whether local file caching is turned on
     if (variable_get('amazons3_cache', FALSE)) {
       $this->caching = TRUE;
+    }
+
+    // Check whether public access turned on
+    if (variable_get('amazons3_public_access', FALSE)) {
+      $this->public_access = TRUE;
     }
 
     // Torrent list
@@ -552,7 +562,7 @@ class AmazonS3StreamWrapper implements DrupalStreamWrapperInterface {
     if($this->write_buffer) {
       $response = $this->getS3()->create_object($this->bucket, $this->getLocalPath(), array(
         'body' => $this->buffer,
-        'acl' => AmazonS3::ACL_PUBLIC,
+        'acl' => ($this->public_access) ? AmazonS3::ACL_PUBLIC : AmazonS3::ACL_PRIVATE,
         'contentType' => AmazonS3StreamWrapper::getMimeType($this->uri),
       ));
       if($response->isOK()) {
@@ -647,7 +657,7 @@ class AmazonS3StreamWrapper implements DrupalStreamWrapperInterface {
     $response = $s3->copy_object(
       array('bucket' => $this->bucket, 'filename' => $from),
       array('bucket' => $this->bucket, 'filename' => $to),
-      array('acl' => AmazonS3::ACL_PUBLIC)
+      array('acl' => ($this->public_access) ? AmazonS3::ACL_PUBLIC : AmazonS3::ACL_PRIVATE)
     );
     if (!$response->isOK()) {
       return FALSE;
