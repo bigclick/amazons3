@@ -82,6 +82,13 @@ function amazons3_admin() {
     '#description'    => t('Enable a local file metadata cache, this significantly reduces calls to S3'),
     '#default_value'  => variable_get('amazons3_cache', 1),
   );
+  
+  $form['amazons3_public_access'] = array(
+    '#type'           => 'checkbox',
+    '#title'          => t('Enable public access'),
+    '#description'    => t('This will set the S3 object permissions to everyone'),
+    '#default_value'  => variable_get('amazons3_public_access', 1),
+  );
 
   $form['amazons3_cname'] = array(
     '#type'           => 'checkbox',
